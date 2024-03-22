@@ -35,6 +35,7 @@ export const crearSalida = async (req, res, next) => {
     fabrica,
     salida,
     espera,
+    chofer_vehiculo,
     datos_cliente,
   } = req.body;
 
@@ -44,7 +45,7 @@ export const crearSalida = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo,total_flete, total_control,fabrica, salida,espera, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *",
+      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo,total_flete, total_control,fabrica, salida,espera, chofer_vehiculo, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
       [
         chofer,
         km_viaje_control,
@@ -59,6 +60,7 @@ export const crearSalida = async (req, res, next) => {
         fabrica,
         salida,
         espera,
+        chofer_vehiculo,
         datosClienteJSON,
         username,
         userRole,
@@ -95,6 +97,7 @@ export const actualizarSalida = async (req, res) => {
     fabrica,
     salida,
     espera,
+    chofer_vehiculo,
     datos_cliente,
   } = req.body;
 
@@ -102,7 +105,7 @@ export const actualizarSalida = async (req, res) => {
   const datos_cliente_json = JSON.stringify(datos_cliente);
 
   const result = await pool.query(
-    "UPDATE salidas SET chofer = $1, km_viaje_control = $2, km_viaje_control_precio = $3, fletes_km = $4, fletes_km_precio = $5, armadores = $6, total_viaticos = $7, motivo = $8, total_flete = $9, total_control = $10, fabrica = $11, salida = $12, espera = $13, datos_cliente = $14, usuario = $15, role_id = $16 WHERE id = $17",
+    "UPDATE salidas SET chofer = $1, km_viaje_control = $2, km_viaje_control_precio = $3, fletes_km = $4, fletes_km_precio = $5, armadores = $6, total_viaticos = $7, motivo = $8, total_flete = $9, total_control = $10, fabrica = $11, salida = $12, espera = $13, chofer_vehiculo = $14, datos_cliente = $15, usuario = $16, role_id = $17 WHERE id = $18",
     [
       chofer,
       km_viaje_control,
@@ -117,6 +120,7 @@ export const actualizarSalida = async (req, res) => {
       fabrica,
       salida,
       espera,
+      chofer_vehiculo,
       datos_cliente_json, // Usar el objeto JSON en la consulta
       username,
       userRole,
