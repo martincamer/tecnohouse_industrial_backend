@@ -1,25 +1,13 @@
 // Importa el servidor de Express desde tu archivo app.js
 import app from "./app.js";
-import { ORIGIN } from "./config.js";
+import { ORIGIN, PORT } from "./config.js";
 
 // Importa createServer y Server de http y socket.io respectivamente
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-// Importa el puerto desde tu configuración
-import { PORT } from "./config.js";
-
 // Crea el servidor HTTP utilizando Express
 const httpServer = createServer(app);
-
-// const io = new Server(server, {
-// cors: {
-// origin: “*”,
-// methods: [“GET”, “POST”],
-// allowedHeaders: [‘Access-Control-Allow-Origin’]
-// },
-// maxHttpBufferSize: 1e8
-// });
 
 // Crea el servidor de Socket.io y adjúntalo al servidor HTTP
 const io = new Server(httpServer, {
