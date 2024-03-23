@@ -1,0 +1,24 @@
+# railway.toml
+
+# Definir la versión de la infraestructura de Railway
+version = "2022.02.15"
+
+# Definir los servicios de la aplicación
+[[services]]
+# Nombre del servicio
+name = "web"
+
+# Tipo de servicio, en este caso, es un servicio web
+type = "web"
+
+# Comando de inicio para ejecutar la aplicación
+# Asegúrate de ajustar el comando según la estructura de tu proyecto
+# Por ejemplo, si estás usando Node.js y tu archivo de inicio es app.js, el comando podría ser "node app.js"
+# Si estás utilizando TypeScript, podría ser "node dist/app.js" después de compilar TypeScript
+command = "node app.js"
+
+# Puerto en el que la aplicación debe escuchar
+# Debe coincidir con el puerto que estás utilizando en tu aplicación para Socket.io
+internal_port = 4000
+
+# Secciones de configuración adicionales según sea necesario
