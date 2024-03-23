@@ -12,12 +12,24 @@ import { PORT } from "./config.js";
 // Crea el servidor HTTP utilizando Express
 const httpServer = createServer(app);
 
+// const io = new Server(server, {
+// cors: {
+// origin: “*”,
+// methods: [“GET”, “POST”],
+// allowedHeaders: [‘Access-Control-Allow-Origin’]
+// },
+// maxHttpBufferSize: 1e8
+// });
+
 // Crea el servidor de Socket.io y adjúntalo al servidor HTTP
 const io = new Server(httpServer, {
   cors: {
     origin: ORIGIN,
     credentials: true,
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    allowedHeaders: ["Access-Control-Allow-Origin"],
   },
+  maxHttpBufferSize: 1e8,
 });
 
 // Maneja eventos de Socket.io
