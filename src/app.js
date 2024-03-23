@@ -5,7 +5,6 @@ import authRoutes from "./routes/auth.routes.js";
 import remuneracionRoutes from "./routes/remuneraciones.routes.js";
 import ordenesRoutes from "./routes/ordenes.routes.js";
 import legalesRoutes from "./routes/legales.routes.js";
-
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -14,7 +13,7 @@ import { ORIGIN } from "./config.js";
 
 const app = express();
 
-//middlewaress
+// Middlewares
 app.use(
   cors({
     origin: ORIGIN,
@@ -29,7 +28,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//routes
 // Routes
 app.get("/", (req, res) => res.json({ message: "welcome to my API" }));
 app.get("/api/ping", async (req, res) => {
@@ -42,7 +40,7 @@ app.use("/api", remuneracionRoutes);
 app.use("/api", ordenesRoutes);
 app.use("/api", legalesRoutes);
 
-//error handler
+// Error handler
 app.use((err, req, res, next) => {
   res.status(500).json({
     status: "error",
