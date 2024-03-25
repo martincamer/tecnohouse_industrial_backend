@@ -29,9 +29,9 @@ io.on("connection", (socket) => {
     io.emit("nueva-salida", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
   });
 
-  socket.on("editar-salida", (datosSalida) => {
-    console.log("editar salida:", datosSalida);
-    io.emit("editar-salida", datosSalida); // Esto emitirá el evento "editar-salida" a todos los clientes conectados
+  socket.on("editar-salida", (editarSalida) => {
+    console.log("editar salida:", editarSalida);
+    io.emit("editar-salida", editarSalida); // Esto emitirá el evento "editar-salida" a todos los clientes conectados
   });
 
   // Maneja el evento "eliminar-salida"
@@ -41,17 +41,53 @@ io.on("connection", (socket) => {
     io.emit("eliminar-salida", datosSalida); // Esto emitirá el evento "eliminar-salida" a todos los clientes conectados
   });
 
+  //eventos de remuneraciones
+  // Maneja el evento "nueva-salida"
+  socket.on("nueva-remuneracion", (datosSalida) => {
+    console.log("Nueva remuneracion:", datosSalida);
+    io.emit("nueva-remuneracion", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
+  socket.on("editar-remuneracion", (editarSalida) => {
+    console.log("editar salida:", editarSalida);
+    io.emit("editar-remuneracion", editarSalida); // Esto emitirá el evento "editar-salida" a todos los clientes conectados
+  });
+
+  socket.on("eliminar-remuneracion", (editarSalida) => {
+    console.log("Eliminar salida:", editarSalida);
+    io.emit("eliminar-remuneracion", editarSalida); // Esto emitirá el evento "editar-salida" a todos los clientes conectados
+  });
+
+  //eventos de legales
+  // Maneja el evento "legales"
+  socket.on("nuevo-legal", (datosSalida) => {
+    console.log("Nueva remuneracion:", datosSalida);
+    io.emit("nuevo-legal", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
+  // Maneja el evento "legales"
+  socket.on("editar-legal", (datosSalida) => {
+    console.log("Nueva remuneracion:", datosSalida);
+    io.emit("editar-legal", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
+  // Maneja el evento "legales"
+  socket.on("eliminar-legal", (datosSalida) => {
+    console.log("Nueva remuneracion:", datosSalida);
+    io.emit("eliminar-legal", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
   // RECIBIMOS EL EVENTOS DE ABRIR PROYECTO
   socket.on("abrir-app", (app) => {
     socket.join(app);
   });
 
   socket.on("actualizar-salidas", (nuevasSalidas) => {
-    console.log("Nuevas salidas recibidas:", nuevasSalidas);
+    // console.log("Nuevas salidas recibidas:", nuevasSalidas);
   });
 
   socket.on("actualizar-choferes", (nuevosChoferes) => {
-    console.log("Nuevos choferes recibidos:", nuevosChoferes);
+    // console.log("Nuevos choferes recibidos:", nuevosChoferes);
   });
 });
 
