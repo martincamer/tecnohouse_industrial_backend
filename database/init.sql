@@ -34,6 +34,16 @@ CREATE TABLE remuneracion (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE rendiciones (
+    id SERIAL PRIMARY KEY,
+    armador VARCHAR(255),
+    rendicion_final numeric,
+    role_id numeric,
+    usuario varchar,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE choferes (
 id SERIAL PRIMARY KEY,
 chofer VARCHAR(255),

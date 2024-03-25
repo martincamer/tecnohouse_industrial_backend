@@ -95,6 +95,24 @@ io.on("connection", (socket) => {
     io.emit("editar-orden", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
   });
 
+  // Maneja el evento "legales"
+  socket.on("crear-rendicion", (datosSalida) => {
+    console.log("Nueva orden:", datosSalida);
+    io.emit("crear-rendicion", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
+  // Maneja el evento "legales"
+  socket.on("eliminar-rendicion", (datosSalida) => {
+    console.log("Nueva orden:", datosSalida);
+    io.emit("eliminar-rendicion", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
+  // Maneja el evento "legales"
+  socket.on("editar-rendicion", (datosSalida) => {
+    console.log("Nueva orden:", datosSalida);
+    io.emit("editar-rendicion", datosSalida); // Esto emitirá el evento "nueva-salida" a todos los clientes conectados
+  });
+
   // RECIBIMOS EL EVENTOS DE ABRIR PROYECTO
   socket.on("abrir-app", (app) => {
     socket.join(app);

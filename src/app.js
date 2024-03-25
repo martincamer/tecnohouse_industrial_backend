@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes.js";
 import remuneracionRoutes from "./routes/remuneraciones.routes.js";
 import ordenesRoutes from "./routes/ordenes.routes.js";
 import legalesRoutes from "./routes/legales.routes.js";
+import rendicionesRoutes from "./routes/rendiciones.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -39,6 +40,7 @@ app.use("/api", salidasRoutes);
 app.use("/api", remuneracionRoutes);
 app.use("/api", ordenesRoutes);
 app.use("/api", legalesRoutes);
+app.use("/api", rendicionesRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
