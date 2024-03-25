@@ -19,14 +19,13 @@ export const getOrden = async (req, res) => {
 
   return res.json(result.rows[0]);
 };
-
 export const crearOrden = async (req, res, next) => {
   const { chofer, fecha_llegada, orden_firma } = req.body;
 
   try {
     const result = await pool.query(
-      "INSERT INTO ordenes (chofer, fecha_llegada, orden_firma) VALUES ($1, $2, $3) RETURNING *",
-      [chofer, fecha_llegada, orden_firma]
+      "INSERT INTO ordenes (chofer, fecha_llegada, orden_firma, finalizado) VALUES ($1, $2, $3, $4) RETURNING *",
+      [chofer, fecha_llegada, orden_firma, 2] // Assigning a default value of 1 to finalizado
     );
 
     res.json(result.rows[0]);
