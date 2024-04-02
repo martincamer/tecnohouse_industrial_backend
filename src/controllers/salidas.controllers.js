@@ -169,7 +169,7 @@ export const eliminarSalida = async (req, res) => {
 export const getSalidaMensual = async (req, res, next) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM salidas WHERE (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE) OR (created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '6 days'))"
+      "SELECT * FROM salidas WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
     );
 
     return res.json(result.rows);
