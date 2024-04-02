@@ -74,10 +74,23 @@ export const eliminarOrden = async (req, res) => {
   return res.sendStatus(204);
 };
 
+// export const getOrdenesMensuales = async (req, res, next) => {
+//   try {
+//     const result = await pool.query(
+//       "SELECT * FROM ordenes WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
+//     );
+
+//     return res.json(result.rows);
+//   } catch (error) {
+//     console.error("Error al obtener órdenes:", error);
+//     return res.status(500).json({ message: "Error interno del servidor" });
+//   }
+// };
+
 export const getOrdenesMensuales = async (req, res, next) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM ordenes WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
+      "SELECT * FROM ordenes WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
     );
 
     return res.json(result.rows);
