@@ -153,18 +153,18 @@ export const eliminarSalida = async (req, res) => {
   return res.sendStatus(204);
 };
 
-export const getSalidaMensual = async (req, res, next) => {
-  try {
-    const result = await pool.query(
-      "SELECT * FROM salidas WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
-    );
+// export const getSalidaMensual = async (req, res, next) => {
+//   try {
+//     const result = await pool.query(
+//       "SELECT * FROM salidas WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
+//     );
 
-    return res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener salidas:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
-  }
-};
+//     return res.json(result.rows);
+//   } catch (error) {
+//     console.error("Error al obtener salidas:", error);
+//     return res.status(500).json({ message: "Error interno del servidor" });
+//   }
+// };
 
 export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   try {
@@ -199,38 +199,38 @@ export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   }
 };
 
-// export const getIngresoMesActualNew = async (req, res, next) => {
-//   try {
-//     // Obtener ingresos del mes actual hasta el quinto día
-//     const result = await pool.query(
-//       "SELECT * FROM ingresos WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at <= CURRENT_DATE + INTERVAL '5 days'"
-//     );
+export const getSalidaMensual = async (req, res, next) => {
+  try {
+    // Obtener ingresos del mes actual hasta el quinto día
+    const result = await pool.query(
+      "SELECT * FROM ingresos WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at <= CURRENT_DATE + INTERVAL '5 days'"
+    );
 
-//     // Calcular el total de la cantidad
-//     const totalIngresos = result.rows.reduce((total, ingreso) => {
-//       return total + parseFloat(ingreso.cantidad); // Asegúrate de adaptar la columna de cantidad según tu esquema
-//     }, 0);
+    // Calcular el total de la cantidad
+    const totalIngresos = result.rows.reduce((total, ingreso) => {
+      return total + parseFloat(ingreso.cantidad); // Asegúrate de adaptar la columna de cantidad según tu esquema
+    }, 0);
 
-//     // Verificar si estamos después del quinto día del mes
-//     const today = new Date();
-//     if (today.getDate() > 5) {
-//       // Calcular la fecha del primer día del mes siguiente (día sexto)
-//       const nextMonthFirstDay = today;
-//       nextMonthFirstDay.setMonth(today.getMonth() + 1, 6);
+    // Verificar si estamos después del quinto día del mes
+    const today = new Date();
+    if (today.getDate() > 5) {
+      // Calcular la fecha del primer día del mes siguiente (día sexto)
+      const nextMonthFirstDay = today;
+      nextMonthFirstDay.setMonth(today.getMonth() + 1, 6);
 
-//       // Guardar el total en la tabla totalPresupuesto para el mes siguiente
-//       await pool.query(
-//         "INSERT INTO totalPresupuesto (mes, total) VALUES ($1, $2)",
-//         [nextMonthFirstDay, totalIngresos]
-//       );
-//     }
+      // Guardar el total en la tabla totalPresupuesto para el mes siguiente
+      await pool.query(
+        "INSERT INTO totalPresupuesto (mes, total) VALUES ($1, $2)",
+        [nextMonthFirstDay, totalIngresos]
+      );
+    }
 
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener ingresos:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener ingresos:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
 
 export const crearChoferes = async (req, res, next) => {
   const { chofer } = req.body;

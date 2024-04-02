@@ -27,7 +27,7 @@ export const crearRendicion = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO rendicion (armador,rendicion_final,detalle, usuario, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      "INSERT INTO rendicion (armador, rendicion_final, detalle, usuario, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [armador, rendicion_final, detalle, username, userRole]
     );
 
