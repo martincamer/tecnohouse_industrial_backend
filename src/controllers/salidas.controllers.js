@@ -203,7 +203,7 @@ export const getSalidaMensual = async (req, res, next) => {
   try {
     // Obtener ingresos del mes actual hasta el quinto día
     const result = await pool.query(
-      "SELECT * FROM ingresos WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at <= CURRENT_DATE + INTERVAL '5 days'"
+      "SELECT * FROM salidas WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at <= CURRENT_DATE + INTERVAL '5 days'"
     );
 
     // Calcular el total de la cantidad
