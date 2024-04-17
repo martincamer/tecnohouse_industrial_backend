@@ -28,6 +28,7 @@ export const crearRemuneracion = async (req, res, next) => {
     km_lineal,
     pago_fletero_espera,
     viaticos,
+    auto,
     refuerzo,
     recaudacion,
     chofer,
@@ -40,7 +41,7 @@ export const crearRemuneracion = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, refuerzo, recaudacion,chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+      "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos,auto, refuerzo, recaudacion,chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
       [
         armador,
         fecha_carga,
@@ -48,6 +49,7 @@ export const crearRemuneracion = async (req, res, next) => {
         km_lineal,
         pago_fletero_espera,
         viaticos,
+        auto,
         refuerzo,
         recaudacion,
         chofer,
@@ -80,6 +82,7 @@ export const actualizarRemuneracion = async (req, res) => {
     km_lineal,
     pago_fletero_espera,
     viaticos,
+    auto,
     refuerzo,
     recaudacion,
     chofer,
@@ -90,7 +93,7 @@ export const actualizarRemuneracion = async (req, res) => {
   const datos_cliente_json = JSON.stringify(datos_cliente);
 
   const result = await pool.query(
-    "UPDATE remuneracion SET armador = $1, fecha_carga = $2, fecha_entrega = $3, km_lineal = $4, pago_fletero_espera = $5, viaticos = $6, refuerzo = $7, recaudacion = $8, chofer = $9, datos_cliente = $10, usuario = $11, role_id = $12 WHERE id = $13",
+    "UPDATE remuneracion SET armador = $1, fecha_carga = $2, fecha_entrega = $3, km_lineal = $4, pago_fletero_espera = $5, viaticos = $6, auto = $7, refuerzo = $8, recaudacion = $9, chofer = $10, datos_cliente = $11, usuario = $12, role_id = $13 WHERE id = $14",
     [
       armador,
       fecha_carga,
@@ -98,6 +101,7 @@ export const actualizarRemuneracion = async (req, res) => {
       km_lineal,
       pago_fletero_espera,
       viaticos,
+      auto,
       refuerzo,
       recaudacion,
       chofer,
