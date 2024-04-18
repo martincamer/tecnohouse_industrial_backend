@@ -43,9 +43,31 @@ export const crearSalida = async (req, res, next) => {
 
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
+  // Verificar si algún campo está vacío
+  if (
+    !chofer ||
+    !km_viaje_control ||
+    !km_viaje_control_precio ||
+    !fletes_km ||
+    !fletes_km_precio ||
+    !armadores ||
+    !total_viaticos ||
+    !total_flete ||
+    !total_control ||
+    !fabrica ||
+    !salida ||
+    !espera ||
+    !chofer_vehiculo ||
+    !datos_cliente
+  ) {
+    return res.status(400).json({
+      message: "Todos los campos son obligatorios.",
+    });
+  }
+
   try {
     const result = await pool.query(
-      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo,total_flete, total_control,fabrica, salida,espera, chofer_vehiculo, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
+      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo, total_flete, total_control, fabrica, salida, espera, chofer_vehiculo, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
       [
         chofer,
         km_viaje_control,
@@ -212,43 +234,18 @@ export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   }
 };
 
-// export const getSalidaMensual = async (req, res, next) => {
-//   try {
-//     // Obtener ingresos del mes actual hasta el quinto día
-//     const result = await pool.query(
-//       "SELECT * FROM salidas WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND created_at <= CURRENT_DATE + INTERVAL '5 days'"
-//     );
-
-//     // Calcular el total de la cantidad
-//     const totalIngresos = result.rows.reduce((total, ingreso) => {
-//       return total + parseFloat(ingreso.cantidad); // Asegúrate de adaptar la columna de cantidad según tu esquema
-//     }, 0);
-
-//     // Verificar si estamos después del quinto día del mes
-//     const today = new Date();
-//     if (today.getDate() > 5) {
-//       // Calcular la fecha del primer día del mes siguiente (día sexto)
-//       const nextMonthFirstDay = today;
-//       nextMonthFirstDay.setMonth(today.getMonth() + 1, 6);
-
-//       // Guardar el total en la tabla totalPresupuesto para el mes siguiente
-//       await pool.query(
-//         "INSERT INTO totalPresupuesto (mes, total) VALUES ($1, $2)",
-//         [nextMonthFirstDay, totalIngresos]
-//       );
-//     }
-
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener ingresos:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
-
 export const crearChoferes = async (req, res, next) => {
   const { chofer } = req.body;
 
   try {
+    // Verificar si el chofer es un número
+    if (!isNaN(chofer)) {
+      return res.status(400).json({
+        message:
+          "El valor proporcionado para el chofer debe ser un texto no numérico.",
+      });
+    }
+
     const result = await pool.query(
       "INSERT INTO choferes (chofer) VALUES ($1) RETURNING *",
       [chofer]

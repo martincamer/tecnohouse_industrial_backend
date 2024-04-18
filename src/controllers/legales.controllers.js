@@ -38,11 +38,32 @@ export const crearLegal = async (req, res, next) => {
 
   const { username, userRole } = req;
 
+  // Validación de campos
+  if (
+    !armador ||
+    typeof armador !== "string" ||
+    !fecha_carga ||
+    !fecha_entrega ||
+    isNaN(km_lineal) ||
+    isNaN(pago_fletero_espera) ||
+    isNaN(viaticos) ||
+    isNaN(auto) ||
+    isNaN(refuerzo) ||
+    isNaN(recaudacion) ||
+    !chofer ||
+    !datos_cliente
+  ) {
+    return res.status(400).json({
+      message:
+        "Todos los campos son obligatorios y deben tener el formato correcto.",
+    });
+  }
+
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
   try {
     const result = await pool.query(
-      "INSERT INTO legal (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos,auto, refuerzo, recaudacion,chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,$13) RETURNING *",
+      "INSERT INTO legal (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
       [
         armador,
         fecha_carga,
@@ -64,7 +85,7 @@ export const crearLegal = async (req, res, next) => {
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
-        message: "Ya existe un legal con ese id",
+        message: "Ya existe una remuneracion con ese id",
       });
     }
     next(error);
