@@ -20,7 +20,7 @@ const router = Router();
 
 router.get("/salidas", isAuth, isAdmin, getSalidas);
 
-router.get("/salidas-mes", isAuth, isAdmin, getSalidaMensual);
+router.get("/salidas-mes", isAuth, isAdmin, getSalidaMensual); // Aplica el mismo middleware
 
 router.post(
   "/salidas/rango-fechas",

@@ -1,11 +1,24 @@
 import { pool } from "../db.js";
 
+//OBTENER TODAS LAS RENDICIONES
 export const getRendiciones = async (req, res, next) => {
-  //obtener perfiles
-  const result = await pool.query("SELECT * FROM rendicion");
-  return res.json(result.rows);
+  try {
+    // Consulta SQL con filtro por localidad
+    const result = await pool.query(
+      "SELECT * FROM rendicion WHERE localidad = $1",
+      [req.localidad]
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener salidas por localidad:", error);
+    // Llama a next con el error para pasar al middleware de manejo de errores
+    return next(error);
+  }
 };
 
+//OBTENER UNICA RENDICION
 export const getRendicion = async (req, res) => {
   const result = await pool.query("SELECT * FROM rendicion WHERE id = $1", [
     req.params.id,
@@ -20,15 +33,24 @@ export const getRendicion = async (req, res) => {
   return res.json(result.rows[0]);
 };
 
+//CREAR NUEVA RENDICION
 export const crearRendicion = async (req, res, next) => {
   const { armador, rendicion_final, detalle } = req.body;
 
-  const { username, userRole } = req;
+  const { username, userRole, localidad, sucursal } = req;
 
   try {
     const result = await pool.query(
-      "INSERT INTO rendicion (armador, rendicion_final, detalle, usuario, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [armador, rendicion_final, detalle, username, userRole]
+      "INSERT INTO rendicion (armador, rendicion_final, detalle,localidad, sucursal, usuario, role_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING *",
+      [
+        armador,
+        rendicion_final,
+        detalle,
+        localidad,
+        sucursal,
+        username,
+        userRole,
+      ]
     );
 
     res.json(result.rows[0]);
@@ -42,6 +64,7 @@ export const crearRendicion = async (req, res, next) => {
   }
 };
 
+//ACTUALIZAR RENDICIÓN
 export const actualizarRendicion = async (req, res) => {
   const id = req.params.id;
 
@@ -67,6 +90,7 @@ export const actualizarRendicion = async (req, res) => {
   });
 };
 
+//ELIMINAR RENDICION
 export const eliminarRendicion = async (req, res) => {
   const result = await pool.query("DELETE FROM rendicion WHERE id = $1", [
     req.params.id,
@@ -81,32 +105,31 @@ export const eliminarRendicion = async (req, res) => {
   return res.sendStatus(204);
 };
 
-// export const getRendicionMensual = async (req, res, next) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT * FROM rendicion WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
-//     );
-
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener rendición:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
-
+//RENDICION MENSUAL
 export const getRendicionMensual = async (req, res, next) => {
   try {
+    console.log("req.localidad:", req.localidad);
+
     const result = await pool.query(
-      "SELECT * FROM rendicion WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
+      "SELECT * FROM rendicion WHERE localidad = $1 AND " +
+        "(" +
+        "  (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND " +
+        "   created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days')" +
+        "  OR " +
+        "  (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))" +
+        ")",
+      [req.localidad]
     );
 
+    // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener rendición:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error al obtener salidas mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
   }
 };
 
+//RENDICIONES POR FECHA
 export const getRendicionPorRangoDeFechas = async (req, res, next) => {
   try {
     const { fechaInicio, fechaFin } = req.body;
@@ -127,15 +150,15 @@ export const getRendicionPorRangoDeFechas = async (req, res, next) => {
       return dateString.match(regex) !== null;
     }
 
-    // Ajuste de zona horaria UTC
+    // Validación de zona horaria y ajuste UTC
     const result = await pool.query(
-      "SELECT * FROM rendicion WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
-      [fechaInicio, fechaFin]
+      "SELECT * FROM rendicion WHERE localidad = $1 AND created_at BETWEEN $2 AND $3 ORDER BY created_at",
+      [req.localidad, fechaInicio, fechaFin]
     );
 
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener rendición:", error);
+    console.error("Error al obtener salidas:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };

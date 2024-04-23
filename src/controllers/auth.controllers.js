@@ -2,71 +2,6 @@ import { pool } from "../db.js";
 import { createAccessToken } from "../libs/jwt.js";
 import bcrypts from "bcryptjs";
 
-// //login
-// export const signin = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-//     email,
-//   ]);
-//   if (result.rowCount === 0) {
-//     return res.status(400).json({
-//       message: "EL correo no esta registrado",
-//     });
-//   }
-
-//   const validPassword = await bcrypt.compare(password, result.rows[0].password);
-//   if (!validPassword) {
-//     return res.status(400).json({
-//       message: "La contraseña es incorrecta",
-//     });
-//   }
-//   const token = await createAccessToken({ id: result.rows[0].id });
-
-//   res.cookie("token", token, {
-//     httpOnly: true,
-//     secure: true,
-//     sameSite: "none",
-//     maxAge: 24 * 60 * 60 * 1000,
-//   });
-
-//   return res.json(result.rows[0]);
-// };
-
-// //registro
-// export const signup = async (req, res, next) => {
-//   //registrar cliente
-//   const { username, email, password } = req.body;
-
-//   try {
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const result = await pool.query(
-//       "INSERT INTO users(username,password,email) VALUES($1,$2,$3) RETURNING *",
-//       [username, hashedPassword, email]
-//     );
-
-//     const token = await createAccessToken({ id: result.rows[0].id });
-
-//     res.cookie("token", token, {
-//       httpOnly: true,
-//       secure: true,
-//       sameSite: "none",
-//       maxAge: 24 * 60 * 60 * 1000,
-//     });
-
-//     return res.json(result.rows[0]);
-//   } catch (error) {
-//     if (error.code === "23505") {
-//       return res.status(400).json({
-//         message: "El correo ya esta registrado",
-//       });
-//     }
-
-//     next(error);
-//   }
-// };
-
 // signin
 export const signin = async (req, res) => {
   const { email, password } = req.body;
@@ -106,14 +41,14 @@ export const signin = async (req, res) => {
 
 // signup
 export const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, sucursal, localidad } = req.body;
 
   try {
     const hashedPassword = await bcrypts.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO users(username,password,email,role_id) VALUES($1,$2,$3,$4) RETURNING *",
-      [username, hashedPassword, email, 2] // Assuming 'user' role has an id of 2
+      "INSERT INTO users(username,password,email,localidad,sucursal,role_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
+      [username, hashedPassword, email, localidad, sucursal, 1] // Assuming 'user' role has an id of 2
     );
 
     const token = await createAccessToken({

@@ -1,9 +1,21 @@
 import { pool } from "../db.js";
 
+//OBTENER TODAS LAS REMUNERACIONES
 export const getRemuneraciones = async (req, res, next) => {
-  //obtener perfiles
-  const result = await pool.query("SELECT * FROM remuneracion");
-  return res.json(result.rows);
+  try {
+    // Consulta SQL con filtro por localidad
+    const result = await pool.query(
+      "SELECT * FROM remuneracion WHERE localidad = $1",
+      [req.localidad]
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener remuneraciones por localidad:", error);
+    // Llama a next con el error para pasar al middleware de manejo de errores
+    return next(error);
+  }
 };
 
 export const getRemuneracion = async (req, res) => {
@@ -35,7 +47,7 @@ export const crearRemuneracion = async (req, res, next) => {
     datos_cliente,
   } = req.body;
 
-  const { username, userRole } = req;
+  const { username, userRole, localidad, sucursal } = req;
 
   // Validación de campos
   if (
@@ -62,7 +74,7 @@ export const crearRemuneracion = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
+      "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, localidad, sucursal, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
       [
         armador,
         fecha_carga,
@@ -75,6 +87,8 @@ export const crearRemuneracion = async (req, res, next) => {
         recaudacion,
         chofer,
         datosClienteJSON,
+        localidad,
+        sucursal,
         username,
         userRole,
       ]
@@ -126,7 +140,7 @@ export const actualizarRemuneracion = async (req, res) => {
       refuerzo,
       recaudacion,
       chofer,
-      datos_cliente_json, // Usar el objeto JSON en la consulta
+      datos_cliente_json,
       username,
       userRole,
       id,
@@ -158,32 +172,31 @@ export const eliminarRemuneracion = async (req, res) => {
   return res.sendStatus(204);
 };
 
-// export const getRemuneracionMensual = async (req, res, next) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT * FROM remuneracion WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
-//     );
-
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener remuneracion:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
-
+//REMUNERACION MENSUAL
 export const getRemuneracionMensual = async (req, res, next) => {
   try {
+    console.log("req.localidad:", req.localidad);
+
     const result = await pool.query(
-      "SELECT * FROM remuneracion WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
+      "SELECT * FROM remuneracion WHERE localidad = $1 AND " +
+        "(" +
+        "  (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND " +
+        "   created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days')" +
+        "  OR " +
+        "  (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))" +
+        ")",
+      [req.localidad]
     );
 
+    // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener remuneracion:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error al obtener salidas mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
   }
 };
 
+//REMUNERACIONES POR FECHA
 export const getRemuneracionPorRangoDeFechas = async (req, res, next) => {
   try {
     const { fechaInicio, fechaFin } = req.body;
@@ -204,15 +217,15 @@ export const getRemuneracionPorRangoDeFechas = async (req, res, next) => {
       return dateString.match(regex) !== null;
     }
 
-    // Ajuste de zona horaria UTC
+    // Validación de zona horaria y ajuste UTC
     const result = await pool.query(
-      "SELECT * FROM remuneracion WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
-      [fechaInicio, fechaFin]
+      "SELECT * FROM remuneracion WHERE localidad = $1 AND created_at BETWEEN $2 AND $3 ORDER BY created_at",
+      [req.localidad, fechaInicio, fechaFin]
     );
 
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener salidas:", error);
+    console.error("Error al obtener remuneraciones:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };

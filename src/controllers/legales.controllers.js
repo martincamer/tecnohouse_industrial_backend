@@ -1,12 +1,25 @@
 //imports
 import { pool } from "../db.js";
 
+//OBTENER TODAS LAS LEGALES
 export const getLegales = async (req, res, next) => {
-  //obtener perfiles
-  const result = await pool.query("SELECT * FROM legal");
-  return res.json(result.rows);
+  try {
+    // Consulta SQL con filtro por localidad
+    const result = await pool.query(
+      "SELECT * FROM legal WHERE localidad = $1",
+      [req.localidad]
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener remuneraciones por localidad:", error);
+    // Llama a next con el error para pasar al middleware de manejo de errores
+    return next(error);
+  }
 };
 
+//OBTENER UNICO LEGAL
 export const getLegal = async (req, res) => {
   const result = await pool.query("SELECT * FROM legal WHERE id = $1", [
     req.params.id,
@@ -21,6 +34,7 @@ export const getLegal = async (req, res) => {
   return res.json(result.rows[0]);
 };
 
+//CREAR LEGAL
 export const crearLegal = async (req, res, next) => {
   const {
     armador,
@@ -36,7 +50,7 @@ export const crearLegal = async (req, res, next) => {
     datos_cliente,
   } = req.body;
 
-  const { username, userRole } = req;
+  const { username, userRole, localidad, sucursal } = req;
 
   // Validación de campos
   if (
@@ -63,7 +77,7 @@ export const crearLegal = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO legal (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
+      "INSERT INTO legal (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente,localidad, sucursal, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14, $15) RETURNING *",
       [
         armador,
         fecha_carga,
@@ -76,6 +90,8 @@ export const crearLegal = async (req, res, next) => {
         recaudacion,
         chofer,
         datosClienteJSON,
+        localidad,
+        sucursal,
         username,
         userRole,
       ]
@@ -85,7 +101,7 @@ export const crearLegal = async (req, res, next) => {
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
-        message: "Ya existe una remuneracion con ese id",
+        message: "Ya existe una legal con ese id",
       });
     }
     next(error);
@@ -159,32 +175,31 @@ export const eliminarLegal = async (req, res) => {
   return res.sendStatus(204);
 };
 
-// export const getLegalMensual = async (req, res, next) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT * FROM legal WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
-//     );
-
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener legal:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
-
+//LEGAL MENSUAL
 export const getLegalMensual = async (req, res, next) => {
   try {
+    console.log("req.localidad:", req.localidad);
+
     const result = await pool.query(
-      "SELECT * FROM legal WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
+      "SELECT * FROM legal WHERE localidad = $1 AND " +
+        "(" +
+        "  (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND " +
+        "   created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days')" +
+        "  OR " +
+        "  (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))" +
+        ")",
+      [req.localidad]
     );
 
+    // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener legal:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error al obtener legal mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
   }
 };
 
+//LEGAL POR FECHA
 export const getLegalPorRangoDeFechas = async (req, res, next) => {
   try {
     const { fechaInicio, fechaFin } = req.body;
@@ -205,15 +220,15 @@ export const getLegalPorRangoDeFechas = async (req, res, next) => {
       return dateString.match(regex) !== null;
     }
 
-    // Ajuste de zona horaria UTC
+    // Validación de zona horaria y ajuste UTC
     const result = await pool.query(
-      "SELECT * FROM legal WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
-      [fechaInicio, fechaFin]
+      "SELECT * FROM legal WHERE localidad = $1 AND created_at BETWEEN $2 AND $3 ORDER BY created_at",
+      [req.localidad, fechaInicio, fechaFin]
     );
 
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener legales:", error);
+    console.error("Error al obtener legal:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };

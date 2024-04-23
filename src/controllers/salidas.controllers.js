@@ -1,9 +1,20 @@
 import { pool } from "../db.js";
 
 export const getSalidas = async (req, res, next) => {
-  //obtener perfiles
-  const result = await pool.query("SELECT * FROM salidas");
-  return res.json(result.rows);
+  try {
+    // Consulta SQL con filtro por localidad
+    const result = await pool.query(
+      "SELECT * FROM salidas WHERE localidad = $1",
+      [req.localidad]
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener salidas por localidad:", error);
+    // Llama a next con el error para pasar al middleware de manejo de errores
+    return next(error);
+  }
 };
 
 export const getSalida = async (req, res) => {
@@ -39,7 +50,7 @@ export const crearSalida = async (req, res, next) => {
     datos_cliente,
   } = req.body;
 
-  const { username, userRole } = req;
+  const { username, userRole, localidad, sucursal } = req;
 
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
@@ -67,7 +78,7 @@ export const crearSalida = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo, total_flete, total_control, fabrica, salida, espera, chofer_vehiculo, datos_cliente, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *",
+      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo, total_flete, total_control, fabrica, salida, espera, chofer_vehiculo, datos_cliente,localidad,sucursal,usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,$18,$19) RETURNING *",
       [
         chofer,
         km_viaje_control,
@@ -84,6 +95,8 @@ export const crearSalida = async (req, res, next) => {
         espera,
         chofer_vehiculo,
         datosClienteJSON,
+        localidad,
+        sucursal,
         username,
         userRole,
       ]
@@ -161,6 +174,7 @@ export const actualizarSalida = async (req, res) => {
   });
 };
 
+//ELIMINAR SALIDA UNICA
 export const eliminarSalida = async (req, res) => {
   const result = await pool.query("DELETE FROM salidas WHERE id = $1", [
     req.params.id,
@@ -175,32 +189,31 @@ export const eliminarSalida = async (req, res) => {
   return res.sendStatus(204);
 };
 
-// export const getSalidaMensual = async (req, res, next) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT * FROM salidas WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)"
-//     );
-
-//     return res.json(result.rows);
-//   } catch (error) {
-//     console.error("Error al obtener salidas:", error);
-//     return res.status(500).json({ message: "Error interno del servidor" });
-//   }
-// };
-
+//OBTENER SALIDAS MENSUALES
 export const getSalidaMensual = async (req, res, next) => {
   try {
+    console.log("req.localidad:", req.localidad);
+
     const result = await pool.query(
-      "SELECT * FROM salidas WHERE (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days') OR (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))"
+      "SELECT * FROM salidas WHERE localidad = $1 AND " +
+        "(" +
+        "  (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND " +
+        "   created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days')" +
+        "  OR " +
+        "  (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))" +
+        ")",
+      [req.localidad]
     );
 
+    // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener salidas:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error al obtener salidas mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
   }
 };
 
+//FILTRAR POR RANGO DE FECHAS
 export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   try {
     const { fechaInicio, fechaFin } = req.body;
@@ -221,10 +234,10 @@ export const getSalidaPorRangoDeFechas = async (req, res, next) => {
       return dateString.match(regex) !== null;
     }
 
-    // Ajuste de zona horaria UTC
+    // Validación de zona horaria y ajuste UTC
     const result = await pool.query(
-      "SELECT * FROM salidas WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
-      [fechaInicio, fechaFin]
+      "SELECT * FROM salidas WHERE localidad = $1 AND created_at BETWEEN $2 AND $3 ORDER BY created_at",
+      [req.localidad, fechaInicio, fechaFin]
     );
 
     return res.json(result.rows);
@@ -234,6 +247,7 @@ export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   }
 };
 
+//PARTE DE CHOFERES
 export const crearChoferes = async (req, res, next) => {
   const { chofer } = req.body;
 
@@ -247,8 +261,8 @@ export const crearChoferes = async (req, res, next) => {
     }
 
     const result = await pool.query(
-      "INSERT INTO choferes (chofer) VALUES ($1) RETURNING *",
-      [chofer]
+      "INSERT INTO choferes (chofer, localidad, sucursal) VALUES ($1, $2, $3) RETURNING *",
+      [chofer, req.localidad, req.sucursal]
     );
 
     res.json(result.rows[0]);
@@ -262,9 +276,12 @@ export const crearChoferes = async (req, res, next) => {
   }
 };
 
-export const getChoferes = async (req, res, next) => {
+export const getChoferes = async (req, res) => {
   //obtener choferes
-  const result = await pool.query("SELECT * FROM choferes");
+  const result = await pool.query(
+    "SELECT * FROM choferes WHERE localidad = $1",
+    [req.localidad]
+  );
   return res.json(result.rows);
 };
 
