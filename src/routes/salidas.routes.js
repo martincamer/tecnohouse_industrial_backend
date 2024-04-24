@@ -11,8 +11,11 @@ import {
   getChoferes,
   getSalida,
   getSalidaMensual,
+  getSalidaMensualAdmin,
   getSalidaPorRangoDeFechas,
+  getSalidasPorRangoDeFechasAdmin,
   getSalidas,
+  getSalidasAdmin,
 } from "../controllers/salidas.controllers.js";
 import { isAdmin } from "../middlewares/salidas.middleware.js";
 
@@ -20,14 +23,11 @@ const router = Router();
 
 router.get("/salidas", isAuth, isAdmin, getSalidas);
 
-router.get("/salidas-mes", isAuth, isAdmin, getSalidaMensual); // Aplica el mismo middleware
+router.get("/salidas-admin", isAuth, isAdmin, getSalidasAdmin);
 
-router.post(
-  "/salidas/rango-fechas",
-  isAuth,
-  isAdmin,
-  getSalidaPorRangoDeFechas
-);
+router.get("/salidas-mes", isAuth, isAdmin, getSalidaMensual);
+
+router.get("/salidas-mes-todas", isAuth, isAdmin, getSalidaMensualAdmin);
 
 router.get("/salidas/:id", isAuth, isAdmin, getSalida);
 
@@ -44,6 +44,13 @@ router.post(
   isAuth,
   isAdmin,
   getSalidaPorRangoDeFechas
+);
+
+router.post(
+  "/salidas-rango-fechas-admin",
+  isAuth,
+  isAdmin,
+  getSalidasPorRangoDeFechasAdmin
 );
 
 router.get("/chofer", isAuth, isAdmin, getChoferes);

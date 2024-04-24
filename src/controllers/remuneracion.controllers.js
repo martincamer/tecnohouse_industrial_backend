@@ -18,6 +18,28 @@ export const getRemuneraciones = async (req, res, next) => {
   }
 };
 
+export const getRemuneracionesAdmin = async (req, res, next) => {
+  try {
+    // Verifica si el pool está conectado
+    if (!pool) {
+      throw new Error("Pool de conexiones no está disponible");
+    }
+
+    const result = await pool.query("SELECT * FROM remuneracion");
+
+    if (result.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ error: "No se encontraron remuneraciones" });
+    }
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener remuneraciones:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 export const getRemuneracion = async (req, res) => {
   const result = await pool.query("SELECT * FROM remuneracion WHERE id = $1", [
     req.params.id,
@@ -196,6 +218,23 @@ export const getRemuneracionMensual = async (req, res, next) => {
   }
 };
 
+//OBTENER REMUNERACIONES MENSUALES ADMIN
+export const getRemuneracionMensualAdmin = async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM remuneracion
+       WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) 
+         AND created_at < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')`
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener salidas mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
+  }
+};
+
 //REMUNERACIONES POR FECHA
 export const getRemuneracionPorRangoDeFechas = async (req, res, next) => {
   try {
@@ -226,6 +265,41 @@ export const getRemuneracionPorRangoDeFechas = async (req, res, next) => {
     return res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener remuneraciones:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+//ADMIN GET FECHAS
+// Función para obtener salidas dentro de un rango de fechas
+export const getRemuneracionPorRangoDeFechasAdmin = async (req, res, next) => {
+  try {
+    const { fechaInicio, fechaFin } = req.body;
+
+    // Validación de fechas
+    if (
+      !fechaInicio ||
+      !fechaFin ||
+      !isValidDate(fechaInicio) ||
+      !isValidDate(fechaFin)
+    ) {
+      return res.status(400).json({ message: "Fechas inválidas" });
+    }
+
+    // Función de validación de fecha
+    function isValidDate(dateString) {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return dateString.match(regex) !== null;
+    }
+
+    // Ajuste de zona horaria UTC
+    const result = await pool.query(
+      "SELECT * FROM remuneracion WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
+      [fechaInicio, fechaFin]
+    );
+
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener órdenes:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };

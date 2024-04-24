@@ -17,6 +17,20 @@ export const getSalidas = async (req, res, next) => {
   }
 };
 
+export const getSalidasAdmin = async (res, next) => {
+  try {
+    // Consulta SQL con filtro por localidad
+    const result = await pool.query("SELECT * FROM salidas");
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener salidas por localidad:", error);
+    // Llama a next con el error para pasar al middleware de manejo de errores
+    return next(error);
+  }
+};
+
 export const getSalida = async (req, res) => {
   const result = await pool.query("SELECT * FROM salidas WHERE id = $1", [
     req.params.id,
@@ -213,6 +227,23 @@ export const getSalidaMensual = async (req, res, next) => {
   }
 };
 
+//OBTENER SALIDAS MENSUALES ADMIN
+export const getSalidaMensualAdmin = async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM salidas
+       WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) 
+         AND created_at < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')`
+    );
+
+    // Retorna el resultado como JSON
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener salidas mensuales:", error);
+    return next(error); // Pasa el error al middleware de manejo de errores
+  }
+};
+
 //FILTRAR POR RANGO DE FECHAS
 export const getSalidaPorRangoDeFechas = async (req, res, next) => {
   try {
@@ -243,6 +274,41 @@ export const getSalidaPorRangoDeFechas = async (req, res, next) => {
     return res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener salidas:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+//ADMIN GET FECHAS
+// Función para obtener salidas dentro de un rango de fechas
+export const getSalidasPorRangoDeFechasAdmin = async (req, res, next) => {
+  try {
+    const { fechaInicio, fechaFin } = req.body;
+
+    // Validación de fechas
+    if (
+      !fechaInicio ||
+      !fechaFin ||
+      !isValidDate(fechaInicio) ||
+      !isValidDate(fechaFin)
+    ) {
+      return res.status(400).json({ message: "Fechas inválidas" });
+    }
+
+    // Función de validación de fecha
+    function isValidDate(dateString) {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return dateString.match(regex) !== null;
+    }
+
+    // Ajuste de zona horaria UTC
+    const result = await pool.query(
+      "SELECT * FROM salidas WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at",
+      [fechaInicio, fechaFin]
+    );
+
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener órdenes:", error);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };
