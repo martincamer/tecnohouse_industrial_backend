@@ -9,6 +9,8 @@ import {
   signin,
   signout,
   signup,
+  updateUserRole,
+  updateUserPassword,
 } from "../controllers/auth.controllers.js";
 import { isAuth } from "../middlewares/auth.middleware.js";
 import { validateSchema } from "../middlewares/validate.middleware.js";
@@ -21,10 +23,17 @@ router.post("/signin", validateSchema(signinSchema), signin);
 
 router.post("/signup", validateSchema(signupSchema), signup);
 
-// router.post("/signup-two", validateSchema(signupSchema), signupTwo);
-// router.put("/users/:id", isAuth, isAdmin, updateUser);
-// router.get("/users/:id", isAuth, isAdmin, getUserById);
-// router.delete("/users/:id", isAuth, isAdmin, deleteUserById);
+router.post("/signup-two", validateSchema(signupSchema), signupTwo);
+
+router.put("/users/:id", isAuth, isAdmin, updateUser);
+
+router.put("/users-password/:id", isAuth, isAdmin, updateUserPassword);
+
+router.put("/users-role/:id", isAuth, isAdmin, updateUserRole);
+
+router.get("/users/:id", isAuth, isAdmin, getUserById);
+
+router.delete("/users/:id", isAuth, isAdmin, deleteUserById);
 
 router.post("/signout", signout);
 
