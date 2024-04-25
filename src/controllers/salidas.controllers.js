@@ -118,12 +118,15 @@ export const crearSalida = async (req, res, next) => {
 
     res.json(result.rows[0]);
   } catch (error) {
+    console.error("Database error:", error); // Para obtener más información sobre el error
     if (error.code === "23505") {
       return res.status(409).json({
         message: "Ya existe una salida con ese id",
       });
     }
-    next(error);
+    return res.status(500).json({
+      message: "Ocurrió un error en el servidor.",
+    });
   }
 };
 
