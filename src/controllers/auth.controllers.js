@@ -217,6 +217,33 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+export const updateUserImagen = async (req, res) => {
+  const userId = req.params.id;
+  const { imagen } = req.body; // Asegúrate de que este campo está en el cuerpo de la solicitud
+
+  try {
+    // Verificar si el usuario existe
+    const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [
+      userId,
+    ]);
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Actualizar solo el campo role_id
+    const updateResult = await pool.query(
+      "UPDATE users SET imagen = $1 WHERE id = $2 RETURNING *",
+      [imagen, userId]
+    );
+
+    res.json(updateResult.rows[0]);
+  } catch (error) {
+    console.error("Error al actualizar el rol del usuario:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
 export const getUserById = async (req, res) => {
   const userId = req.params.id;
 

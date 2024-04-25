@@ -11,6 +11,7 @@ import {
   signup,
   updateUserRole,
   updateUserPassword,
+  updateUserImagen,
 } from "../controllers/auth.controllers.js";
 import { isAuth } from "../middlewares/auth.middleware.js";
 import { validateSchema } from "../middlewares/validate.middleware.js";
@@ -30,6 +31,8 @@ router.put("/users/:id", isAuth, isAdmin, updateUser);
 router.put("/users-password/:id", isAuth, isAdmin, updateUserPassword);
 
 router.put("/users-role/:id", isAuth, isAdmin, updateUserRole);
+
+router.put("/editar-imagen-users/:id", isAuth, isAdmin, updateUserImagen);
 
 router.get("/users/:id", isAuth, isAdmin, getUserById);
 
