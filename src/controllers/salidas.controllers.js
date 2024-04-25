@@ -68,22 +68,21 @@ export const crearSalida = async (req, res, next) => {
 
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
-  // Verificar si algún campo está vacío
   if (
-    !chofer ||
-    !km_viaje_control ||
-    !km_viaje_control_precio ||
-    !fletes_km ||
-    !fletes_km_precio ||
-    !armadores ||
-    !total_viaticos ||
-    !total_flete ||
-    !total_control ||
-    !fabrica ||
-    !salida ||
-    !espera ||
-    !chofer_vehiculo ||
-    !datos_cliente
+    chofer === "" ||
+    km_viaje_control === "" ||
+    km_viaje_control_precio === "" ||
+    fletes_km === "" ||
+    fletes_km_precio === "" ||
+    armadores === "" ||
+    total_viaticos === "" ||
+    total_flete === "" ||
+    total_control === "" ||
+    fabrica === "" ||
+    salida === "" ||
+    espera === "" ||
+    chofer_vehiculo === "" ||
+    datos_cliente === ""
   ) {
     return res.status(400).json({
       message: "Todos los campos son obligatorios.",
