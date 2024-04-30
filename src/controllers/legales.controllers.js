@@ -195,21 +195,22 @@ export const getLegalMensual = async (req, res, next) => {
   try {
     console.log("req.localidad:", req.localidad);
 
+    // Obtener el inicio del mes actual y el inicio del próximo mes
+    const currentMonthStart = "DATE_TRUNC('month', CURRENT_DATE)";
+    const nextMonthStart =
+      "DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')";
+
     const result = await pool.query(
-      "SELECT * FROM legal WHERE localidad = $1 AND " +
-        "(" +
-        "  (created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 days') AND " +
-        "   created_at < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '5 days')" +
-        "  OR " +
-        "  (DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE))" +
-        ")",
+      `SELECT * FROM legal WHERE localidad = $1 
+       AND created_at >= ${currentMonthStart} 
+       AND created_at < ${nextMonthStart}`,
       [req.localidad]
     );
 
     // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener legal mensuales:", error);
+    console.error("Error al obtener datos legales mensuales:", error);
     return next(error); // Pasa el error al middleware de manejo de errores
   }
 };
