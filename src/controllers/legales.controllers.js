@@ -112,7 +112,9 @@ export const crearLegal = async (req, res, next) => {
       ]
     );
 
-    res.json(result.rows[0]);
+    const todasLasRemuneraciones = await pool.query("SELECT * FROM legal");
+
+    res.json(todasLasRemuneraciones.rows);
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
@@ -171,9 +173,9 @@ export const actualizarLegal = async (req, res) => {
     });
   }
 
-  return res.json({
-    message: "Legal actualizado",
-  });
+  const todasLasRemuneraciones = await pool.query("SELECT * FROM legal");
+
+  res.json(todasLasRemuneraciones.rows);
 };
 
 export const eliminarLegal = async (req, res) => {
@@ -187,7 +189,9 @@ export const eliminarLegal = async (req, res) => {
     });
   }
 
-  return res.sendStatus(204);
+  const todasLasRemuneraciones = await pool.query("SELECT * FROM legal");
+
+  res.json(todasLasRemuneraciones.rows);
 };
 
 //LEGAL MENSUAL

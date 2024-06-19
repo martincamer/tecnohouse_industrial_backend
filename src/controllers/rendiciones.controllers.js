@@ -68,7 +68,9 @@ export const crearRendicion = async (req, res, next) => {
       ]
     );
 
-    res.json(result.rows[0]);
+    const todasLasRemuneraciones = await pool.query("SELECT * FROM rendicion");
+
+    res.json(todasLasRemuneraciones.rows);
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
@@ -100,9 +102,9 @@ export const actualizarRendicion = async (req, res) => {
     });
   }
 
-  return res.json({
-    message: "Rendición actualizada",
-  });
+  const todasLasRemuneraciones = await pool.query("SELECT * FROM rendicion");
+
+  res.json(todasLasRemuneraciones.rows);
 };
 
 //ELIMINAR RENDICION
@@ -117,7 +119,9 @@ export const eliminarRendicion = async (req, res) => {
     });
   }
 
-  return res.sendStatus(204);
+  const todasLasRemuneraciones = await pool.query("SELECT * FROM rendicion");
+
+  res.json(todasLasRemuneraciones.rows);
 };
 
 //RENDICION MENSUAL

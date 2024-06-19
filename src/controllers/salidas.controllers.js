@@ -115,7 +115,10 @@ export const crearSalida = async (req, res, next) => {
       ]
     );
 
-    res.json(result.rows[0]);
+    // Obtener todas las salidas actualizadas después de la inserción
+    const todasLasSalidas = await pool.query("SELECT * FROM salidas");
+
+    res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
   } catch (error) {
     console.error("Database error:", error); // Para obtener más información sobre el error
     if (error.code === "23505") {
@@ -185,9 +188,13 @@ export const actualizarSalida = async (req, res) => {
     });
   }
 
-  return res.json({
-    message: "Salida actualizada",
-  });
+  // return res.json({
+  //   message: "Salida actualizada",
+  // });
+  // Obtener todas las salidas actualizadas después de la inserción
+  const todasLasSalidas = await pool.query("SELECT * FROM salidas");
+
+  res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
 };
 
 //ELIMINAR SALIDA UNICA
@@ -202,7 +209,11 @@ export const eliminarSalida = async (req, res) => {
     });
   }
 
-  return res.sendStatus(204);
+  const todasLasSalidas = await pool.query("SELECT * FROM salidas");
+
+  res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
+
+  // return res.sendStatus(204);
 };
 
 //OBTENER SALIDAS MENSUALES
