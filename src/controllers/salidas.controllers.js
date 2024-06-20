@@ -345,7 +345,9 @@ export const crearChoferes = async (req, res, next) => {
       [chofer, req.localidad, req.sucursal]
     );
 
-    res.json(result.rows[0]);
+    const todasLasSalidas = await pool.query("SELECT * FROM choferes");
+
+    res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
@@ -380,9 +382,9 @@ export const actualizarChofer = async (req, res) => {
     });
   }
 
-  return res.json({
-    message: "chofer actualizado",
-  });
+  const todasLasSalidas = await pool.query("SELECT * FROM choferes");
+
+  res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
 };
 
 export const getChofer = async (req, res) => {
@@ -410,5 +412,7 @@ export const eliminarChofer = async (req, res) => {
     });
   }
 
-  return res.sendStatus(204);
+  const todasLasSalidas = await pool.query("SELECT * FROM choferes");
+
+  res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
 };
