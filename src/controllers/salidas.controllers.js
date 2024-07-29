@@ -188,9 +188,6 @@ export const actualizarSalida = async (req, res) => {
     });
   }
 
-  // return res.json({
-  //   message: "Salida actualizada",
-  // });
   // Obtener todas las salidas actualizadas después de la inserción
   const todasLasSalidas = await pool.query("SELECT * FROM salidas");
 
@@ -212,8 +209,6 @@ export const eliminarSalida = async (req, res) => {
   const todasLasSalidas = await pool.query("SELECT * FROM salidas");
 
   res.json(todasLasSalidas.rows); // Devolver todas las salidas en formato JSON
-
-  // return res.sendStatus(204);
 };
 
 //OBTENER SALIDAS MENSUALES
