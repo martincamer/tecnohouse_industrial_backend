@@ -71,26 +71,26 @@ export const crearRemuneracion = async (req, res, next) => {
 
   const { username, userRole, localidad, sucursal } = req;
 
-  // Validación de campos
-  if (
-    !armador ||
-    typeof armador !== "string" ||
-    !fecha_carga ||
-    !fecha_entrega ||
-    isNaN(km_lineal) ||
-    isNaN(pago_fletero_espera) ||
-    isNaN(viaticos) ||
-    isNaN(auto) ||
-    isNaN(refuerzo) ||
-    isNaN(recaudacion) ||
-    !chofer ||
-    !datos_cliente
-  ) {
-    return res.status(400).json({
-      message:
-        "Todos los campos son obligatorios y deben tener el formato correcto.",
-    });
-  }
+  // // Validación de campos
+  // if (
+  //   !armador ||
+  //   typeof armador !== "string" ||
+  //   !fecha_carga ||
+  //   !fecha_entrega ||
+  //   isNaN(km_lineal) ||
+  //   isNaN(pago_fletero_espera) ||
+  //   isNaN(viaticos) ||
+  //   isNaN(auto) ||
+  //   isNaN(refuerzo) ||
+  //   isNaN(recaudacion) ||
+  //   !chofer ||
+  //   !datos_cliente
+  // ) {
+  //   return res.status(400).json({
+  //     message:
+  //       "Todos los campos son obligatorios y deben tener el formato correcto.",
+  //   });
+  // }
 
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
