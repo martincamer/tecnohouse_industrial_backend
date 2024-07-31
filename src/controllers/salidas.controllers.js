@@ -61,33 +61,18 @@ export const crearSalida = async (req, res, next) => {
     salida,
     espera,
     chofer_vehiculo,
-    datos_cliente,
+    datos_cliente = [],
   } = req.body;
 
   const { username, userRole, localidad, sucursal } = req;
 
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
-  if (
-    chofer === "" ||
-    km_viaje_control === "" ||
-    km_viaje_control_precio === "" ||
-    fletes_km === "" ||
-    fletes_km_precio === "" ||
-    armadores === "" ||
-    total_viaticos === "" ||
-    total_flete === "" ||
-    total_control === "" ||
-    fabrica === "" ||
-    salida === "" ||
-    espera === "" ||
-    chofer_vehiculo === "" ||
-    datos_cliente === ""
-  ) {
-    return res.status(400).json({
-      message: "Todos los campos son obligatorios.",
-    });
-  }
+  // if (chofer === "" || chofer_vehiculo === "") {
+  //   return res.status(400).json({
+  //     message: "Todos los campos son obligatorios.",
+  //   });
+  // }
 
   try {
     const result = await pool.query(
