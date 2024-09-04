@@ -14,7 +14,7 @@ export const isAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, "react2021");
 
     const result = await pool.query(
-      "SELECT role_id,username,localidad,sucursal FROM users WHERE id = $1",
+      "SELECT role_id,username,localidad,sucursal,tipo FROM users WHERE id = $1",
       [decoded.id]
     );
 
@@ -24,6 +24,7 @@ export const isAuth = async (req, res, next) => {
     req.email = result.rows[0].email;
     req.localidad = result.rows[0].localidad;
     req.sucursal = result.rows[0].sucursal;
+    req.tipo = result.rows[0].tipo;
 
     next();
   } catch (err) {

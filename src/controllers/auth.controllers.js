@@ -27,6 +27,7 @@ export const signin = async (req, res) => {
   const token = await createAccessToken({
     id: result.rows[0].id,
     role: result.rows[0].role_id,
+    tipo: result.rows[0].tipo,
   });
 
   res.cookie("token", token, {
@@ -54,6 +55,7 @@ export const signup = async (req, res, next) => {
     const token = await createAccessToken({
       id: result.rows[0].id,
       role: result.rows[0].role_id,
+      tipo: result.rows[0].tipo,
     });
 
     res.cookie("token", token, {

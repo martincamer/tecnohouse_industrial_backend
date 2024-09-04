@@ -17,16 +17,15 @@ export const getSalidas = async (req, res, next) => {
   }
 };
 
-export const getSalidasAdmin = async (res, next) => {
+export const getSalidasAdmin = async (req, res, next) => {
   try {
-    // Consulta SQL con filtro por localidad
+    console.log("Fetching data from 'salidas' table...");
     const result = await pool.query("SELECT * FROM salidas");
+    console.log("Query result:", result.rows);
 
-    // Retorna el resultado como JSON
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener salidas por localidad:", error);
-    // Llama a next con el error para pasar al middleware de manejo de errores
+    console.error("Error fetching data from 'salidas' table:", error);
     return next(error);
   }
 };
