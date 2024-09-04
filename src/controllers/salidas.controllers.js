@@ -61,6 +61,8 @@ export const crearSalida = async (req, res, next) => {
     espera,
     chofer_vehiculo,
     datos_cliente = [],
+    gastos,
+    detalle_iveco,
   } = req.body;
 
   const { username, userRole, localidad, sucursal } = req;
@@ -75,7 +77,7 @@ export const crearSalida = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo, total_flete, total_control, fabrica, salida, espera, chofer_vehiculo, datos_cliente,localidad,sucursal,usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,$18,$19) RETURNING *",
+      "INSERT INTO salidas (chofer, km_viaje_control, km_viaje_control_precio, fletes_km, fletes_km_precio, armadores, total_viaticos, motivo, total_flete, total_control, fabrica, salida, espera, chofer_vehiculo, datos_cliente,gastos,detalle_iveco, localidad,sucursal,usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,$18,$19,$20,$21) RETURNING *",
       [
         chofer,
         km_viaje_control,
@@ -92,6 +94,8 @@ export const crearSalida = async (req, res, next) => {
         espera,
         chofer_vehiculo,
         datosClienteJSON,
+        gastos,
+        detalle_iveco,
         localidad,
         sucursal,
         username,
