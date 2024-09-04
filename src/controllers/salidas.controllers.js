@@ -141,13 +141,15 @@ export const actualizarSalida = async (req, res) => {
     espera,
     chofer_vehiculo,
     datos_cliente,
+    gastos,
+    detalle_iveco,
   } = req.body;
 
   // Convertir el objeto datos_cliente a JSON
   const datos_cliente_json = JSON.stringify(datos_cliente);
 
   const result = await pool.query(
-    "UPDATE salidas SET chofer = $1, km_viaje_control = $2, km_viaje_control_precio = $3, fletes_km = $4, fletes_km_precio = $5, armadores = $6, total_viaticos = $7, motivo = $8, total_flete = $9, total_control = $10, fabrica = $11, salida = $12, espera = $13, chofer_vehiculo = $14, datos_cliente = $15, usuario = $16, role_id = $17 WHERE id = $18",
+    "UPDATE salidas SET chofer = $1, km_viaje_control = $2, km_viaje_control_precio = $3, fletes_km = $4, fletes_km_precio = $5, armadores = $6, total_viaticos = $7, motivo = $8, total_flete = $9, total_control = $10, fabrica = $11, salida = $12, espera = $13, chofer_vehiculo = $14, datos_cliente = $15, gastos = $16, detalle_iveco = $17, usuario = $18, role_id = $19 WHERE id = $20",
     [
       chofer,
       km_viaje_control,
@@ -164,6 +166,8 @@ export const actualizarSalida = async (req, res) => {
       espera,
       chofer_vehiculo,
       datos_cliente_json, // Usar el objeto JSON en la consulta
+      gastos,
+      detalle_iveco,
       username,
       userRole,
       id,
