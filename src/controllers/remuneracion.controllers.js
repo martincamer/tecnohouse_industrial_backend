@@ -71,30 +71,10 @@ export const crearRemuneracion = async (req, res, next) => {
 
   const { username, userRole, localidad, sucursal } = req;
 
-  // // Validación de campos
-  // if (
-  //   !armador ||
-  //   typeof armador !== "string" ||
-  //   !fecha_carga ||
-  //   !fecha_entrega ||
-  //   isNaN(km_lineal) ||
-  //   isNaN(pago_fletero_espera) ||
-  //   isNaN(viaticos) ||
-  //   isNaN(auto) ||
-  //   isNaN(refuerzo) ||
-  //   isNaN(recaudacion) ||
-  //   !chofer ||
-  //   !datos_cliente
-  // ) {
-  //   return res.status(400).json({
-  //     message:
-  //       "Todos los campos son obligatorios y deben tener el formato correcto.",
-  //   });
-  // }
-
   const datosClienteJSON = JSON.stringify(datos_cliente);
 
   try {
+    // Insert new remuneration
     const result = await pool.query(
       "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, localidad, sucursal, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
       [
@@ -116,11 +96,25 @@ export const crearRemuneracion = async (req, res, next) => {
       ]
     );
 
+    // Convert recaudacion to a number
+    const recaudacionNum = parseFloat(recaudacion);
+
+    // Update the total in the caja for the corresponding localidad
+    await pool.query(
+      "UPDATE caja SET total = (total::numeric + $1) WHERE localidad = $2",
+      [recaudacionNum, localidad]
+    );
+
     const todasLasRemuneraciones = await pool.query(
       "SELECT * FROM remuneracion"
     );
 
-    res.json(todasLasRemuneraciones.rows);
+    const todasLasCajas = await pool.query("SELECT * FROM caja");
+
+    res.json({
+      remuneraciones: todasLasRemuneraciones.rows,
+      caja: todasLasCajas.rows,
+    });
   } catch (error) {
     if (error.code === "23505") {
       return res.status(409).json({
@@ -153,36 +147,178 @@ export const actualizarRemuneracion = async (req, res) => {
   // Convertir el objeto datos_cliente a JSON
   const datos_cliente_json = JSON.stringify(datos_cliente);
 
-  const result = await pool.query(
-    "UPDATE remuneracion SET armador = $1, fecha_carga = $2, fecha_entrega = $3, km_lineal = $4, pago_fletero_espera = $5, viaticos = $6, auto = $7, refuerzo = $8, recaudacion = $9, chofer = $10, datos_cliente = $11, usuario = $12, role_id = $13 WHERE id = $14",
-    [
-      armador,
-      fecha_carga,
-      fecha_entrega,
-      km_lineal,
-      pago_fletero_espera,
-      viaticos,
-      auto,
-      refuerzo,
-      recaudacion,
-      chofer,
-      datos_cliente_json,
-      username,
-      userRole,
-      id,
-    ]
-  );
+  try {
+    // Fetch the current recaudacion
+    const currentRemuneracion = await pool.query(
+      "SELECT recaudacion FROM remuneracion WHERE id = $1",
+      [id]
+    );
 
-  if (result.rowCount === 0) {
-    return res.status(404).json({
-      message: "No existe una salida con ese id",
-    });
+    if (currentRemuneracion.rowCount === 0) {
+      return res.status(404).json({
+        message: "No existe una remuneracion con ese id",
+      });
+    }
+
+    const currentRecaudacion = parseFloat(
+      currentRemuneracion.rows[0].recaudacion
+    );
+
+    // Update caja total: subtract current recaudacion and add new recaudacion
+    const newRecaudacionNum = parseFloat(recaudacion);
+    const localidad = req.body.localidad; // Make sure you have localidad in your request body
+
+    await pool.query(
+      "UPDATE caja SET total = (total::numeric - $1 + $2) WHERE localidad = $3",
+      [currentRecaudacion, newRecaudacionNum, localidad]
+    );
+
+    // Update the remuneration
+    const result = await pool.query(
+      "UPDATE remuneracion SET armador = $1, fecha_carga = $2, fecha_entrega = $3, km_lineal = $4, pago_fletero_espera = $5, viaticos = $6, auto = $7, refuerzo = $8, recaudacion = $9, chofer = $10, datos_cliente = $11, usuario = $12, role_id = $13 WHERE id = $14",
+      [
+        armador,
+        fecha_carga,
+        fecha_entrega,
+        km_lineal,
+        pago_fletero_espera,
+        viaticos,
+        auto,
+        refuerzo,
+        newRecaudacionNum, // Use the new recaudacion
+        chofer,
+        datos_cliente_json,
+        username,
+        userRole,
+        id,
+      ]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "No existe una salida con ese id",
+      });
+    }
+
+    const todasLasRemuneraciones = await pool.query(
+      "SELECT * FROM remuneracion"
+    );
+
+    res.json(todasLasRemuneraciones.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al actualizar la remuneración" });
   }
-
-  const todasLasRemuneraciones = await pool.query("SELECT * FROM remuneracion");
-
-  res.json(todasLasRemuneraciones.rows);
 };
+
+// export const crearRemuneracion = async (req, res, next) => {
+//   const {
+//     armador,
+//     fecha_carga,
+//     fecha_entrega,
+//     km_lineal,
+//     pago_fletero_espera,
+//     viaticos,
+//     auto,
+//     refuerzo,
+//     recaudacion,
+//     chofer,
+//     datos_cliente,
+//   } = req.body;
+
+//   const { username, userRole, localidad, sucursal } = req;
+
+//   const datosClienteJSON = JSON.stringify(datos_cliente);
+
+//   try {
+//     const result = await pool.query(
+//       "INSERT INTO remuneracion (armador, fecha_carga, fecha_entrega, km_lineal, pago_fletero_espera, viaticos, auto, refuerzo, recaudacion, chofer, datos_cliente, localidad, sucursal, usuario, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
+//       [
+//         armador,
+//         fecha_carga,
+//         fecha_entrega,
+//         km_lineal,
+//         pago_fletero_espera,
+//         viaticos,
+//         auto,
+//         refuerzo,
+//         recaudacion,
+//         chofer,
+//         datosClienteJSON,
+//         localidad,
+//         sucursal,
+//         username,
+//         userRole,
+//       ]
+//     );
+
+//     const todasLasRemuneraciones = await pool.query(
+//       "SELECT * FROM remuneracion"
+//     );
+
+//     res.json(todasLasRemuneraciones.rows);
+//   } catch (error) {
+//     if (error.code === "23505") {
+//       return res.status(409).json({
+//         message: "Ya existe una remuneracion con ese id",
+//       });
+//     }
+//     next(error);
+//   }
+// };
+
+// export const actualizarRemuneracion = async (req, res) => {
+//   const id = req.params.id;
+
+//   const { username, userRole } = req;
+
+//   const {
+//     armador,
+//     fecha_carga,
+//     fecha_entrega,
+//     km_lineal,
+//     pago_fletero_espera,
+//     viaticos,
+//     auto,
+//     refuerzo,
+//     recaudacion,
+//     chofer,
+//     datos_cliente,
+//   } = req.body;
+
+//   // Convertir el objeto datos_cliente a JSON
+//   const datos_cliente_json = JSON.stringify(datos_cliente);
+
+//   const result = await pool.query(
+//     "UPDATE remuneracion SET armador = $1, fecha_carga = $2, fecha_entrega = $3, km_lineal = $4, pago_fletero_espera = $5, viaticos = $6, auto = $7, refuerzo = $8, recaudacion = $9, chofer = $10, datos_cliente = $11, usuario = $12, role_id = $13 WHERE id = $14",
+//     [
+//       armador,
+//       fecha_carga,
+//       fecha_entrega,
+//       km_lineal,
+//       pago_fletero_espera,
+//       viaticos,
+//       auto,
+//       refuerzo,
+//       recaudacion,
+//       chofer,
+//       datos_cliente_json,
+//       username,
+//       userRole,
+//       id,
+//     ]
+//   );
+
+//   if (result.rowCount === 0) {
+//     return res.status(404).json({
+//       message: "No existe una salida con ese id",
+//     });
+//   }
+
+//   const todasLasRemuneraciones = await pool.query("SELECT * FROM remuneracion");
+
+//   res.json(todasLasRemuneraciones.rows);
+// };
 
 export const eliminarRemuneracion = async (req, res) => {
   const result = await pool.query("DELETE FROM remuneracion WHERE id = $1", [
