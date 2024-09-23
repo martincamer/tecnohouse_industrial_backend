@@ -128,7 +128,7 @@ export const crearRemuneracion = async (req, res, next) => {
 export const actualizarRemuneracion = async (req, res) => {
   const id = req.params.id;
 
-  const { username, userRole } = req;
+  const { username, userRole, localidad } = req;
 
   const {
     armador,
@@ -166,7 +166,7 @@ export const actualizarRemuneracion = async (req, res) => {
 
     // Update caja total: subtract current recaudacion and add new recaudacion
     const newRecaudacionNum = parseFloat(recaudacion);
-    const localidad = req.body.localidad; // Make sure you have localidad in your request body
+    // const localidad = req.localidad; // Make sure you have localidad in your request body
 
     await pool.query(
       "UPDATE caja SET total = (total::numeric - $1 + $2) WHERE localidad = $3",
@@ -204,7 +204,12 @@ export const actualizarRemuneracion = async (req, res) => {
       "SELECT * FROM remuneracion"
     );
 
-    res.json(todasLasRemuneraciones.rows);
+    const todasLasCajas = await pool.query("SELECT * FROM caja");
+
+    res.json({
+      remuneraciones: todasLasRemuneraciones.rows,
+      caja: todasLasCajas.rows,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al actualizar la remuneración" });
@@ -320,20 +325,75 @@ export const actualizarRemuneracion = async (req, res) => {
 //   res.json(todasLasRemuneraciones.rows);
 // };
 
+// export const eliminarRemuneracion = async (req, res) => {
+//   const result = await pool.query("DELETE FROM remuneracion WHERE id = $1", [
+//     req.params.id,
+//   ]);
+
+//   if (result.rowCount === 0) {
+//     return res.status(404).json({
+//       message: "No existe ningun presupuesto con ese id",
+//     });
+//   }
+
+//   const todasLasRemuneraciones = await pool.query("SELECT * FROM remuneracion");
+
+//   res.json(todasLasRemuneraciones.rows);
+// };
+
 export const eliminarRemuneracion = async (req, res) => {
-  const result = await pool.query("DELETE FROM remuneracion WHERE id = $1", [
-    req.params.id,
-  ]);
+  const { id } = req.params;
+  const { localidad } = req; // Asegúrate de tener la localidad en la solicitud
 
-  if (result.rowCount === 0) {
-    return res.status(404).json({
-      message: "No existe ningun presupuesto con ese id",
+  try {
+    // Obtener la recaudación actual antes de eliminar
+    const currentRemuneracion = await pool.query(
+      "SELECT recaudacion FROM remuneracion WHERE id = $1",
+      [id]
+    );
+
+    if (currentRemuneracion.rowCount === 0) {
+      return res.status(404).json({
+        message: "No existe ninguna remuneración con ese id",
+      });
+    }
+
+    const currentRecaudacion = parseFloat(
+      currentRemuneracion.rows[0].recaudacion
+    );
+
+    // Actualizar la caja restando la recaudación de la remuneración que se va a eliminar
+    await pool.query(
+      "UPDATE caja SET total = (total::numeric - $1) WHERE localidad = $2",
+      [currentRecaudacion, localidad]
+    );
+
+    // Eliminar la remuneración
+    const result = await pool.query("DELETE FROM remuneracion WHERE id = $1", [
+      id,
+    ]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "No existe ninguna remuneración con ese id",
+      });
+    }
+
+    // Obtener todas las remuneraciones después de eliminar
+    const todasLasRemuneraciones = await pool.query(
+      "SELECT * FROM remuneracion"
+    );
+
+    const todasLasCajas = await pool.query("SELECT * FROM caja");
+
+    res.json({
+      remuneraciones: todasLasRemuneraciones.rows,
+      caja: todasLasCajas.rows,
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al eliminar la remuneración" });
   }
-
-  const todasLasRemuneraciones = await pool.query("SELECT * FROM remuneracion");
-
-  res.json(todasLasRemuneraciones.rows);
 };
 
 //REMUNERACION MENSUAL
