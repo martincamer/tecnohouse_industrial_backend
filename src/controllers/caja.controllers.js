@@ -1,16 +1,15 @@
 import { pool } from "../db.js";
 
-// OBTENER TODAS LAS CAJAS
+// OBTENER TODAS LAS CAJAS POR LOCALIDAD
 export const getCajas = async (req, res, next) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM caja WHERE localidad = $1 AND sucursal = $2",
-      [req.localidad, req.sucursal]
-    );
+    const result = await pool.query("SELECT * FROM caja WHERE localidad = $1", [
+      req.localidad,
+    ]);
 
     return res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener cajas por localidad y sucursal:", error);
+    console.error("Error al obtener cajas por localidad:", error);
     return next(error);
   }
 };
