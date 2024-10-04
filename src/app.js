@@ -7,6 +7,8 @@ import ordenesRoutes from "./routes/ordenes.routes.js";
 import legalesRoutes from "./routes/legales.routes.js";
 import rendicionesRoutes from "./routes/rendiciones.routes.js";
 import cajasRoutes from "./routes/caja.routes.js";
+import gastosRoutes from "./routes/gastos.routes.js";
+import ingresosRoutes from "./routes/ingresos.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -43,6 +45,8 @@ app.use("/api", ordenesRoutes);
 app.use("/api", legalesRoutes);
 app.use("/api", rendicionesRoutes);
 app.use("/api", cajasRoutes);
+app.use("/api", gastosRoutes);
+app.use("/api", ingresosRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
